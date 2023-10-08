@@ -76,7 +76,7 @@ class Renderer:
         self._pinned_bufs   = dict()    # {(shape, dtype): torch.Tensor, ...}
         self._cmaps         = dict()    # {name: torch.Tensor, ...}
         self._is_timing     = False
-        if not disable_timing:
+        if not disable_timing and torch.cuda.is_available():
             self._start_event   = torch.cuda.Event(enable_timing=True)
             self._end_event     = torch.cuda.Event(enable_timing=True)
         self._disable_timing = disable_timing
@@ -85,7 +85,7 @@ class Renderer:
     def render(self, **args):
         if self._disable_timing:
             self._is_timing = False
-        else:
+        elif torch.cuda.is_available():
             self._start_event.record(torch.cuda.current_stream(self._device))
             self._is_timing = True
         res = dnnlib.EasyDict()
@@ -113,7 +113,7 @@ class Renderer:
             self._render_drag_impl(res, **args)
         except:
             res.error = CapturedException()
-        if not self._disable_timing:
+        if not self._disable_timing and torch.cuda.is_available():
             self._end_event.record(torch.cuda.current_stream(self._device))
         if 'image' in res:
             res.image = self.to_cpu(res.image).detach().numpy()
@@ -180,7 +180,7 @@ class Renderer:
         key = (tuple(ref.shape), ref.dtype)
         buf = self._pinned_bufs.get(key, None)
         if buf is None:
-            buf = torch.empty(ref.shape, dtype=ref.dtype).pin_memory()
+            buf = torch.empty(ref.shape, dtype=ref.dtype)
             self._pinned_bufs[key] = buf
         return buf
 

@@ -1,3 +1,4 @@
+# python>3.10
 torch>=2.0.0
 scipy==1.11.0
 Ninja==1.10.2
@@ -8,6 +9,6 @@ hf_transfer
 pyopengl
 imgui
 glfw==2.6.1
-pillow>=9.4.0
+pillow==9.5.0
 torchvision>=0.15.2
 imageio>=2.9.0
